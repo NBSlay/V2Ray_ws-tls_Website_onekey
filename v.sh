@@ -341,7 +341,7 @@ web_install(){
 	echo -e "${OK} ${GreenBG} 安装Website伪装站点 ${Font}"
 	sleep 2
 	mkdir /www
-	wget https://github.com/dylanbai8/V2Ray_ws-tls_Website_onekey/raw/master/V2rayWebsite.tar.gz
+	wget https://github.com/NBSlay/V2Ray_ws-tls_Website_onekey/raw/master/V2rayWebsite.tar.gz
 	tar -zxvf V2rayWebsite.tar.gz -C /www
 	rm -f V2rayWebsite.tar.gz
 }
@@ -597,58 +597,6 @@ modify_userjson(){
 	sed -i "s/SETHEADER/www.${hostheader}.com/g" "${v2ray_user}"
 }
 
-#安装bbr端口加速
-rinetdbbr_install(){
-	export RINET_URL="https://drive.google.com/uc?id=0B0D0hDHteoksVzZ4MG5hRkhqYlk"
-
-	for CMD in curl iptables grep cut xargs systemctl ip awk
-	do
-		if ! type -p ${CMD}; then
-			echo -e "\e[1;31mtool ${CMD} 缺少依赖 Rinetd BBR 终止安装 \e[0m"
-			exit 1
-		fi
-	done
-
-	systemctl disable rinetd-bbr.service
-	killall -9 rinetd-bbr
-	rm -rf /usr/bin/rinetd-bbr /etc/rinetd-bbr.conf /etc/systemd/system/rinetd-bbr.service
-
-	echo -e "${OK} ${GreenBG} 下载Rinetd-BBR安装文件 ${Font}"
-	curl -L "${RINET_URL}" >/usr/bin/rinetd-bbr
-	chmod +x /usr/bin/rinetd-bbr
-
-	echo -e "${OK} ${GreenBG} 配置 ${port} 为加速端口 ${Font}"
-	cat <<EOF >> /etc/rinetd-bbr.conf
-0.0.0.0 ${port} 0.0.0.0 ${port}
-EOF
-
-	IFACE=$(ip -4 addr | awk '{if ($1 ~ /inet/ && $NF ~ /^[ve]/) {a=$NF}} END{print a}')
-
-	cat <<EOF > /etc/systemd/system/rinetd-bbr.service
-[Unit]
-Description=rinetd with bbr
-Documentation=https://github.com/linhua55/lkl_study
-
-[Service]
-ExecStart=/usr/bin/rinetd-bbr -f -c /etc/rinetd-bbr.conf raw ${IFACE}
-Restart=always
-User=root
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-	systemctl enable rinetd-bbr.service
-	systemctl start rinetd-bbr.service
-
-	if systemctl status rinetd-bbr >/dev/null; then
-		echo -e "${OK} ${GreenBG} Rinetd-BBR 安装成功 ${Font}"
-		echo -e "${OK} ${GreenBG} ${port} 端口加速成功 ${Font}"
-	else
-		echo -e "${Error} ${RedBG} Rinetd-BBR 安装失败 ${Font}"
-	fi
-}
-
 #重启nginx和v2ray程序 加载配置
 start_process_systemd(){
 	systemctl enable v2ray >/dev/null 2>&1
@@ -822,7 +770,7 @@ share_uuid(){
 win64_v2ray(){
 	TAG_URL="https://api.github.com/repos/v2ray/v2ray-core/releases/latest"
 	NEW_VER=`curl -s ${TAG_URL} --connect-timeout 10| grep 'tag_name' | cut -d\" -f4`
-	wget https://github.com/dylanbai8/V2Ray_ws-tls_Website_onekey/raw/master/V2rayPro.zip
+	wget https://github.com/NBSlay/V2Ray_ws-tls_Website_onekey/raw/master/V2rayPro.zip
 	wget https://github.com/v2ray/v2ray-core/releases/download/${NEW_VER}/v2ray-windows-64.zip
 	echo -e "${OK} ${GreenBG} 正在生成Windows客户端 v2ray-core最新版本 ${NEW_VER} ${Font}"
 	unzip V2rayPro.zip
